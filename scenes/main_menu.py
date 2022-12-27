@@ -1,37 +1,55 @@
+import os
+from typing import List
 import pygame
-from scenes.scene import Scene
 from scenes.game import Game
 
 
-class MainMenuScene(Scene):
+class MainMenuScene():
     """Main menu scene"""
 
     def __init__(self, scene_stack):
-        super().__init__(scene_stack)
+        self.scene_stack = scene_stack
 
     def draw(self, screen):
-        # draw a simple main menu with buttons
-        pygame.draw.rect(screen, (0, 0, 0), (0, 0, 500, 400))
+
+        # use background image instead of a solid color
+        background = pygame.image.load(os.path.join(
+            "assets/images", "menu", "1.png"))
+        background = pygame.transform.scale(background, (1280, 720))
+        screen.blit(background, (0, 0))
+
+        # draw a simple main menu with buttons over the whole screen
         pygame.draw.rect(screen, (255, 0, 0), (100, 100, 300, 100))
-        pygame.draw.rect(screen, (0, 255, 0), (100, 200, 300, 100))
+        pygame.draw.rect(screen, (0, 255, 0), (100, 300, 300, 100))
 
-        font = pygame.font.SysFont('Arial', 32)
-        text = font.render('Play', True, (255, 255, 255))
-        screen.blit(text, (200, 125))
-        text = font.render('Quit', True, (255, 255, 255))
-        screen.blit(text, (200, 225))
-
-        super().draw(screen)
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+        textsurface = myfont.render('Start Game', False, (0, 0, 0))
+        screen.blit(textsurface, (100, 100))
+        textsurface = myfont.render('Quit', False, (0, 0, 0))
+        screen.blit(textsurface, (100, 300))
 
     def update(self):
-        # check if the user clicked the play or quit button and change the scene accordingly
-        # only check on mouse down to prevent multiple clicks
-        if pygame.mouse.get_pressed()[0]:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            if 100 < mouse_x < 400 and 100 < mouse_y < 200:
-                self.scene_stack.append(Game(self.scene_stack))
-            elif 100 < mouse_x < 400 and 200 < mouse_y < 300:
+        # event loop
+        events: List[pygame.event.Event] = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
                 pygame.quit()
-                exit(0)
+                quit()
 
-        super().update()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                    self.scene_stack.append(Game(self.scene_stack))
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if 100 < mouse_pos[0] < 400 and 100 < mouse_pos[1] < 200:
+                        self.scene_stack.append(Game(self.scene_stack))
+
+                    if 100 < mouse_pos[0] < 400 and 300 < mouse_pos[1] < 400:
+                        pygame.quit()
+                        quit()

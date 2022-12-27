@@ -1,47 +1,46 @@
 import time
 import pygame
-from scenes.scene import Scene
+import os
 
 
-class PauseMenu(Scene):
+class PauseMenu():
     def __init__(self, scene_stack):
-        super().__init__(scene_stack)
+        self.scene_stack = scene_stack
 
     def draw(self, screen):
-        # add a title to the pause menu
-        font = pygame.font.SysFont('Arial', 32)
-        text = font.render('Pause Menu', True, (255, 255, 255))
-        screen.blit(text, (100, 50))
 
-        # draw a simple main menu with buttons
-        pygame.draw.rect(screen, (0, 0, 0), (0, 0, 500, 400))
+        background = pygame.image.load(os.path.join(
+            "assets/images", "menu", "1.png"))
+        background = pygame.transform.scale(background, (1280, 720))
+        screen.blit(background, (0, 0))
+
         pygame.draw.rect(screen, (255, 0, 0), (100, 100, 300, 100))
-        pygame.draw.rect(screen, (0, 255, 0), (100, 200, 300, 100))
+        pygame.draw.rect(screen, (0, 255, 0), (100, 300, 300, 100))
 
-        font = pygame.font.SysFont('Arial', 32)
-        text = font.render('Resume', True, (255, 255, 255))
-        screen.blit(text, (200, 125))
-        text = font.render('Quit', True, (255, 255, 255))
-        screen.blit(text, (200, 225))
-
-        super().draw(screen)
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+        textsurface = myfont.render('Resume', False, (0, 0, 0))
+        screen.blit(textsurface, (100, 100))
+        textsurface = myfont.render('Quit', False, (0, 0, 0))
+        screen.blit(textsurface, (100, 300))
 
     def update(self):
-        if pygame.mouse.get_pressed()[0]:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            if 100 < mouse_x < 400 and 100 < mouse_y < 200:
-                self.scene_stack.pop()
-            elif 100 < mouse_x < 400 and 200 < mouse_y < 300:
-                # leave to main menu
-                self.scene_stack.clear()
-                from scenes.main_menu import MainMenuScene
-                self.scene_stack.append(MainMenuScene(self.scene_stack))
-                # small hack to prevent the user from clicking the button multiple times
-                # since the button is in the same position as the main menu button
-                time.sleep(0.1)
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYUP:
                 if event.key == pygame.K_ESCAPE:
                     self.scene_stack.pop()
-        super().update()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if 100 < mouse_pos[0] < 400 and 100 < mouse_pos[1] < 200:
+                        self.scene_stack.pop()
+
+                    if 100 < mouse_pos[0] < 400 and 300 < mouse_pos[1] < 400:
+                        pygame.quit()
+                        quit()

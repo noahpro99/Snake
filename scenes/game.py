@@ -24,7 +24,7 @@ class Game():
         self.enemies = pygame.sprite.Group()
 
         # add random enemies around the player but not too close
-        for i in range(8):
+        for i in range(10):
             x = randint(-500, 500)
             y = randint(-500, 500)
 
@@ -40,12 +40,14 @@ class Game():
 
         self.camera_group.draw(screen)
 
-        # draw the enemies health bars
+        camera_offset = self.camera_group.offset
+
+        # draw the enemies health bars above their heads using the camera offset to position them correctly
         for enemy in self.enemies.sprites():
-            pygame.draw.rect(screen, (255, 0, 0),
-                             (enemy.rect.x, enemy.rect.y - 10, 50, 5))
-            pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x,
-                             enemy.rect.y - 10, enemy.health, 5))
+            pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x -
+                                                   camera_offset[0], enemy.rect.y - camera_offset[1] - 30, 50, 10))
+            pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x -
+                                                   camera_offset[0], enemy.rect.y - camera_offset[1] - 30, enemy.health, 10))
 
     def update(self):
         # event loop
@@ -71,12 +73,15 @@ class Game():
 
         for enemy in self.enemies.sprites():
             if enemy.is_attacking and enemy.rect.colliderect(self.player.rect):
-                self.do_damage(10, self.player)
+                self.do_damage(5, self.player)
 
             if self.player.is_attacking and self.player.rect.colliderect(enemy.rect):
-                self.do_damage(10, enemy)
+                self.do_damage(5, enemy)
 
         self.camera_group.update()
+
+        if self.player.health <= 0:
+            self.scene_stack.pop()
 
     def do_damage(self, damage, target):
         target.health -= damage

@@ -34,28 +34,33 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.facing_right = True
         self.is_attacking = False
+        self.attack_delay = 60
 
         self.health = 100
 
     def input(self, keys):
         """Handle player input"""
         self.direction = pygame.math.Vector2(0, 0)
-        if keys[pygame.K_w]:
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
             self.direction.y = -1
-        elif keys[pygame.K_s]:
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
             self.direction.y = 1
-        if keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.direction.x = -1
             self.facing_right = False
-        elif keys[pygame.K_d]:
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.direction.x = 1
             self.facing_right = True
+        if keys[pygame.K_SPACE] or keys[pygame.K_RETURN]:
+            self.attack()
 
     def update(self):
         """Update the player's position"""
         self.input(pygame.key.get_pressed())
         self.rect.move_ip(self.direction * self.walk_speed)
         self.animate()
+        if self.attack_delay > 0:
+            self.attack_delay -= 1
 
     def animate(self):
         """Animate the player"""
@@ -80,5 +85,9 @@ class Player(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.image, True, False)
 
     def attack(self):
-        """Attack"""
-        self.is_attacking = True
+        """Attack based on delay"""
+        if self.attack_delay <= 0:
+            self.is_attacking = True
+            self.attack_delay = 60
+        else:
+            self.attack_delay -= 1
